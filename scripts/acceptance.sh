@@ -8,7 +8,7 @@
 #   3. assert catalog equivalence across all granularity/partition variants
 #      (same schema, different shapes -> identical catalog)
 #   4. deploy shop@v1 + the generated shop-v1-to-v2 migration and assert the
-#      resulting catalog equals sources/shop.v2.sql loaded fresh
+#      resulting catalog equals examples/diff-migration/input/shop.v2.sql loaded fresh
 #   5. revert every module and assert the database is left clean
 #
 # Steps whose packages don't exist yet are skipped with a notice, so CI stays
@@ -117,9 +117,9 @@ assert_same_catalog() {
 # 1+2. deploy + verify every variant into its own scratch database
 # ---------------------------------------------------------------------------
 declare -A VARIANT_DB=(
-  [packages/shop]=shop_object
-  [packages/shop-atomic]=shop_atomic
-  [packages/shop-consolidated]=shop_consolidated
+  [examples/import-dump/output/shop]=shop_object
+  [examples/granularity-atomic/output/shop-atomic]=shop_atomic
+  [examples/granularity-consolidated/output/shop-consolidated]=shop_consolidated
 )
 
 DEPLOYED_VARIANTS=()
@@ -133,67 +133,67 @@ for pkg in "${!VARIANT_DB[@]}"; do
 done
 
 # Partition pair deploys into ONE database (shop-security requires shop-app).
-if [ -d packages/shop-security ]; then
-  deploy_module packages/shop-app shop_partitioned
-  deploy_module packages/shop-security shop_partitioned
+if [ -d examples/partition-security/output/shop-security ]; then
+  deploy_module examples/partition-security/output/shop-app shop_partitioned
+  deploy_module examples/partition-security/output/shop-security shop_partitioned
   DEPLOYED_PARTITION=1
 else
-  skip "packages/shop-app + packages/shop-security"
+  skip "examples/partition-security/output/shop-app + examples/partition-security/output/shop-security"
   DEPLOYED_PARTITION=0
 fi
 
 # ---------------------------------------------------------------------------
 # 3. catalog equivalence across variants
 # ---------------------------------------------------------------------------
-if [ -d packages/shop ]; then
+if [ -d examples/import-dump/output/shop ]; then
   for pkg in "${DEPLOYED_VARIANTS[@]}"; do
-    [ "$pkg" = packages/shop ] && continue
-    assert_same_catalog shop_object "${VARIANT_DB[$pkg]}" "object vs ${pkg#packages/}"
+    [ "$pkg" = examples/import-dump/output/shop ] && continue
+    assert_same_catalog shop_object "${VARIANT_DB[$pkg]}" "object vs $(basename "$pkg")"
   done
   if [ "$DEPLOYED_PARTITION" = 1 ]; then
     assert_same_catalog shop_object shop_partitioned "object vs partitioned"
   fi
 else
-  skip "catalog equivalence (packages/shop)"
+  skip "catalog equivalence (examples/import-dump/output/shop)"
 fi
 
 # ---------------------------------------------------------------------------
 # 3b. the packed single-file projection of the module == the module
 # ---------------------------------------------------------------------------
-if [ -f sources/shop.module.sql ] && [ -d packages/shop ]; then
-  note "load sources/shop.module.sql fresh -> shop_packed"
+if [ -f examples/pack-module/output/shop.module.sql ] && [ -d examples/import-dump/output/shop ]; then
+  note "load examples/pack-module/output/shop.module.sql fresh -> shop_packed"
   $PSQL -d postgres -c 'CREATE DATABASE shop_packed'
-  $PSQL -d shop_packed -v ON_ERROR_STOP=1 -f sources/shop.module.sql
+  $PSQL -d shop_packed -v ON_ERROR_STOP=1 -f examples/pack-module/output/shop.module.sql
   assert_same_catalog shop_object shop_packed "object vs packed single-file SQL"
 else
-  skip "packed single-file SQL check (sources/shop.module.sql)"
+  skip "packed single-file SQL check (examples/pack-module/output/shop.module.sql)"
 fi
 
 # ---------------------------------------------------------------------------
 # 4. shop@v1 + shop-v1-to-v2 migration == shop.v2.sql deployed fresh
 # ---------------------------------------------------------------------------
-if [ -d packages/shop-v1-to-v2 ] && [ -d packages/shop ]; then
-  deploy_module packages/shop shop_migrated
-  deploy_module packages/shop-v1-to-v2 shop_migrated
+if [ -d examples/diff-migration/output/shop-v1-to-v2 ] && [ -d examples/import-dump/output/shop ]; then
+  deploy_module examples/import-dump/output/shop shop_migrated
+  deploy_module examples/diff-migration/output/shop-v1-to-v2 shop_migrated
 
-  note "load sources/shop.v2.sql fresh -> shop_v2_fresh"
+  note "load examples/diff-migration/input/shop.v2.sql fresh -> shop_v2_fresh"
   $PSQL -d postgres -c 'CREATE DATABASE shop_v2_fresh'
-  $PSQL -d shop_v2_fresh -f sources/shop.v2.sql
+  $PSQL -d shop_v2_fresh -f examples/diff-migration/input/shop.v2.sql
 
   assert_same_catalog shop_migrated shop_v2_fresh "v1 + migration vs v2 fresh"
 
   # the --emit-sql projection of the same delta, applied as plain SQL
-  if [ -f sources/shop.v1-to-v2.sql ]; then
+  if [ -f examples/diff-migration/output/shop.v1-to-v2.sql ]; then
     note "load v1 dump + linear delta SQL -> shop_sql_migrated"
     $PSQL -d postgres -c 'CREATE DATABASE shop_sql_migrated'
-    $PSQL -d shop_sql_migrated -v ON_ERROR_STOP=1 -f sources/shop.v1.sql
-    $PSQL -d shop_sql_migrated -v ON_ERROR_STOP=1 -f sources/shop.v1-to-v2.sql
+    $PSQL -d shop_sql_migrated -v ON_ERROR_STOP=1 -f examples/import-dump/input/shop.v1.sql
+    $PSQL -d shop_sql_migrated -v ON_ERROR_STOP=1 -f examples/diff-migration/output/shop.v1-to-v2.sql
     assert_same_catalog shop_sql_migrated shop_v2_fresh "linear SQL delta vs v2 fresh"
   else
-    skip "linear SQL delta check (sources/shop.v1-to-v2.sql)"
+    skip "linear SQL delta check (examples/diff-migration/output/shop.v1-to-v2.sql)"
   fi
 else
-  skip "v1 -> v2 migration check (packages/shop-v1-to-v2)"
+  skip "v1 -> v2 migration check (examples/diff-migration/output/shop-v1-to-v2)"
 fi
 
 # ---------------------------------------------------------------------------
@@ -204,8 +204,8 @@ for pkg in "${DEPLOYED_VARIANTS[@]}"; do
   assert_db_clean "${VARIANT_DB[$pkg]}"
 done
 if [ "$DEPLOYED_PARTITION" = 1 ]; then
-  revert_module packages/shop-security shop_partitioned
-  revert_module packages/shop-app shop_partitioned
+  revert_module examples/partition-security/output/shop-security shop_partitioned
+  revert_module examples/partition-security/output/shop-app shop_partitioned
   assert_db_clean shop_partitioned
 fi
 
