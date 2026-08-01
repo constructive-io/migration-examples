@@ -40,10 +40,11 @@ produced it.
 | [granularity-consolidated](examples/granularity-consolidated) | [the module](examples/import-dump/output/shop) | [same schema, compact history](examples/granularity-consolidated/output/shop-consolidated) |
 | [partition-security](examples/partition-security) | [the module](examples/import-dump/output/shop) + [partition.json](examples/partition-security/input/partition.json) | [shop-app](examples/partition-security/output/shop-app) + [shop-security](examples/partition-security/output/shop-security) with cross-package requires |
 | [diff-migration](examples/diff-migration) | [the module (v1)](examples/import-dump/output/shop) vs [shop.v2.sql](examples/diff-migration/input/shop.v2.sql) | [migration module](examples/diff-migration/output/shop-v1-to-v2) + [delta as one SQL file](examples/diff-migration/output/shop.v1-to-v2.sql) |
+| [fold-atomic-statements](examples/fold-atomic-statements) | [atomic statement soup](examples/fold-atomic-statements/input/blog.atomic.sql) (empty `CREATE TABLE ()` + one `ADD COLUMN` per statement) | [grouped module](examples/fold-atomic-statements/output/blog) with fully folded CREATE TABLEs |
+| [flatten-history](examples/flatten-history) | [evolution log with churn](examples/flatten-history/input/inventory.churn.sql) (ADD then DROP column, late NOT NULL) | [flattened module](examples/flatten-history/output/inventory) |
 
-More examples are planned (atomic statement soup → grouped module, history
-flattening, `--naming flat`, bundles + `deploy --fast`, `--append-module`,
-live-db diff sides) — see the full combination matrix in
+More examples are planned (`--naming flat`, bundles + `deploy --fast`,
+`--append-module`, live-db diff sides) — see the full combination matrix in
 [constructive-planning#1344](https://github.com/constructive-io/constructive-planning/issues/1344).
 
 ## Layout
