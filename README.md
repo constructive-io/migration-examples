@@ -1,12 +1,12 @@
-# migration-examples
+# pgpm-projections
 
 <p align="center" width="100%">
   <img height="250" src="https://raw.githubusercontent.com/constructive-io/constructive/refs/heads/main/assets/outline-logo.svg" />
 </p>
 
 <p align="center" width="100%">
-  <a href="https://github.com/constructive-io/migration-examples/actions/workflows/ci.yml">
-    <img height="20" src="https://github.com/constructive-io/migration-examples/actions/workflows/ci.yml/badge.svg" />
+  <a href="https://github.com/constructive-io/pgpm-projections/actions/workflows/ci.yml">
+    <img height="20" src="https://github.com/constructive-io/pgpm-projections/actions/workflows/ci.yml/badge.svg" />
   </a>
 </p>
 
