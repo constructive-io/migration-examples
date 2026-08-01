@@ -170,6 +170,26 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# 3c. imported "statement soup" modules == their raw inputs loaded fresh
+# ---------------------------------------------------------------------------
+IMPORT_EQUIV_DEPLOYED=()
+for spec in \
+  "examples/fold-atomic-statements|blog|blog.atomic.sql" \
+  "examples/flatten-history|inventory|inventory.churn.sql"; do
+  IFS='|' read -r ex_dir pkg input <<< "$spec"
+  if [ -d "$ex_dir/output/$pkg" ]; then
+    deploy_module "$ex_dir/output/$pkg" "${pkg}_module"
+    note "load $ex_dir/input/$input fresh -> ${pkg}_raw"
+    $PSQL -d postgres -c "CREATE DATABASE ${pkg}_raw"
+    $PSQL -d "${pkg}_raw" -v ON_ERROR_STOP=1 -f "$ex_dir/input/$input"
+    assert_same_catalog "${pkg}_module" "${pkg}_raw" "$pkg module vs raw input"
+    IMPORT_EQUIV_DEPLOYED+=("$ex_dir/output/$pkg|${pkg}_module")
+  else
+    skip "$ex_dir/output/$pkg"
+  fi
+done
+
+# ---------------------------------------------------------------------------
 # 4. shop@v1 + shop-v1-to-v2 migration == shop.v2.sql deployed fresh
 # ---------------------------------------------------------------------------
 if [ -d examples/diff-migration/output/shop-v1-to-v2 ] && [ -d examples/import-dump/output/shop ]; then
@@ -208,5 +228,10 @@ if [ "$DEPLOYED_PARTITION" = 1 ]; then
   revert_module examples/partition-security/output/shop-app shop_partitioned
   assert_db_clean shop_partitioned
 fi
+for entry in "${IMPORT_EQUIV_DEPLOYED[@]}"; do
+  IFS='|' read -r pkg_dir db <<< "$entry"
+  revert_module "$pkg_dir" "$db"
+  assert_db_clean "$db"
+done
 
 note "acceptance suite complete"
