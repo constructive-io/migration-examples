@@ -158,6 +158,18 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# 3b. the packed single-file projection of the module == the module
+# ---------------------------------------------------------------------------
+if [ -f sources/shop.module.sql ] && [ -d packages/shop ]; then
+  note "load sources/shop.module.sql fresh -> shop_packed"
+  $PSQL -d postgres -c 'CREATE DATABASE shop_packed'
+  $PSQL -d shop_packed -v ON_ERROR_STOP=1 -f sources/shop.module.sql
+  assert_same_catalog shop_object shop_packed "object vs packed single-file SQL"
+else
+  skip "packed single-file SQL check (sources/shop.module.sql)"
+fi
+
+# ---------------------------------------------------------------------------
 # 4. shop@v1 + shop-v1-to-v2 migration == shop.v2.sql deployed fresh
 # ---------------------------------------------------------------------------
 if [ -d packages/shop-v1-to-v2 ] && [ -d packages/shop ]; then
