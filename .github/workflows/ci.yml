@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  PGPM_VERSION: 5.20.0
+  PGPM_VERSION: 5.21.0
 
 jobs:
   acceptance:

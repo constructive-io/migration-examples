@@ -1,0 +1,5 @@
+# shop-single-change extension
+comment = 'shop-single-change extension'
+default_version = '0.0.1'
+relocatable = false
+superuser = false
