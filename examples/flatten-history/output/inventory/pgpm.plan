@@ -1,0 +1,7 @@
+%syntax-version=1.0.0
+%project=inventory
+%uri=inventory
+
+schemas/inventory/schema 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/inventory/schema
+schemas/inventory/tables/warehouses/table [schemas/inventory/schema] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/inventory/tables/warehouses/table
+schemas/inventory/tables/items/table [schemas/inventory/schema schemas/inventory/tables/warehouses/table] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/inventory/tables/items/table
