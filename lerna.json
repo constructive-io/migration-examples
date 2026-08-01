@@ -6,7 +6,7 @@
     "--frozen-lockfile"
   ],
   "packages": [
-    "packages/*"
+    "examples/*/output/*"
   ],
   "registry": "https://registry.npmjs.org",
   "command": {
