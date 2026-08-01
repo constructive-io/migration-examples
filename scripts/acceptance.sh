@@ -169,6 +169,17 @@ if [ -d packages/shop-v1-to-v2 ] && [ -d packages/shop ]; then
   $PSQL -d shop_v2_fresh -f sources/shop.v2.sql
 
   assert_same_catalog shop_migrated shop_v2_fresh "v1 + migration vs v2 fresh"
+
+  # the --emit-sql projection of the same delta, applied as plain SQL
+  if [ -f sources/shop.v1-to-v2.sql ]; then
+    note "load v1 dump + linear delta SQL -> shop_sql_migrated"
+    $PSQL -d postgres -c 'CREATE DATABASE shop_sql_migrated'
+    $PSQL -d shop_sql_migrated -v ON_ERROR_STOP=1 -f sources/shop.v1.sql
+    $PSQL -d shop_sql_migrated -v ON_ERROR_STOP=1 -f sources/shop.v1-to-v2.sql
+    assert_same_catalog shop_sql_migrated shop_v2_fresh "linear SQL delta vs v2 fresh"
+  else
+    skip "linear SQL delta check (sources/shop.v1-to-v2.sql)"
+  fi
 else
   skip "v1 -> v2 migration check (packages/shop-v1-to-v2)"
 fi

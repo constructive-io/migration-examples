@@ -103,8 +103,17 @@ deploys on top of `shop-app`.
 
 ```sh
 pgpm import sources/shop.v2.sql --pkg shop-v2 --out /tmp/v2mod
-pgpm diff packages/shop /tmp/v2mod/shop-v2 --emit-migration packages --pkg shop-v1-to-v2 --verify
+pgpm diff packages/shop /tmp/v2mod/shop-v2 --emit-migration packages --pkg shop-v1-to-v2 \
+  --emit-sql sources/shop.v1-to-v2.sql --verify
 ```
+
+The delta is one model and every `--emit-*` flag is a projection of it: the
+pgpm module lands in `packages/shop-v1-to-v2`, and the same delta deparsed as
+a single linear SQL script lands in
+[`sources/shop.v1-to-v2.sql`](sources/shop.v1-to-v2.sql)
+(`--emit-bundle` would additionally produce a content-addressed
+`.bundle.tar.gz`). `pgpm diff --append-module <dir>` can instead append the
+delta as new changes into an existing module.
 
 Identity-keyed semantic diff between the v1 module and the v2 schema. Tables
 are compared column-by-column and constraint-by-constraint, so the delta is
