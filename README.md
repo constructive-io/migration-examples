@@ -60,7 +60,7 @@ database object, spec-derived change paths, graph-derived `requires`, and
 generated revert/verify scripts. pg_dump preamble noise is skipped; grants and
 comments ride with their host object.
 
-> Status: pending — will be generated as `pgpm import` is exercised.
+> Status: generated — 53 statements → 15 changes (12 preamble statements skipped, 0 warnings).
 
 ### 2. `packages/shop-atomic` — the granularity dial, turned all the way down
 

@@ -32,18 +32,25 @@ catalog_dump() {
     | grep -v '^[[:space:]]*$'
 }
 
+module_name() {
+  basename "$(ls "$1"/*.control)" .control
+}
+
 deploy_module() {
-  local pkg_dir="$1" db="$2"
+  local pkg_dir="$1" db="$2" pkg
+  pkg="$(module_name "$pkg_dir")"
   note "deploy $pkg_dir -> $db"
-  (cd "$pkg_dir" && pgpm deploy --createdb --database "$db" --yes --no-tty)
+  $PSQL -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = '$db'" | grep -q 1 \
+    || $PSQL -d postgres -c "CREATE DATABASE $db"
+  (cd "$pkg_dir" && pgpm deploy --database "$db" --package "$pkg" --yes --no-tty)
   note "verify $pkg_dir on $db"
-  (cd "$pkg_dir" && pgpm verify --database "$db" --no-tty)
+  (cd "$pkg_dir" && pgpm verify --database "$db" --package "$pkg" --no-tty)
 }
 
 revert_module() {
   local pkg_dir="$1" db="$2"
   note "revert $pkg_dir on $db"
-  (cd "$pkg_dir" && pgpm revert --database "$db" --yes --no-tty)
+  (cd "$pkg_dir" && pgpm revert --database "$db" --package "$(module_name "$pkg_dir")" --yes --no-tty)
   # after a full revert, no non-pgpm user schemas may remain
   local leftovers
   leftovers=$($PSQL -d "$db" -tAc \
