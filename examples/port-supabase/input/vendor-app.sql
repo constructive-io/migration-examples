@@ -1,0 +1,41 @@
+CREATE SCHEMA auth;
+
+CREATE TABLE auth.users (
+  id uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  encrypted_password text,
+  confirmation_token text,
+  recovery_token text
+);
+
+CREATE FUNCTION auth.uid() RETURNS uuid AS $EOFCODE$
+  SELECT nullif(current_setting('request.jwt.claim.sub', true), '')::uuid;
+$EOFCODE$ LANGUAGE sql STABLE;
+
+CREATE SCHEMA app;
+
+GRANT USAGE ON SCHEMA app TO authenticated;
+
+CREATE TABLE app.documents (
+  id uuid PRIMARY KEY DEFAULT extensions.uuid_generate_v4(),
+  owner uuid NOT NULL,
+  title text NOT NULL
+);
+
+ALTER TABLE app.documents 
+  ADD CONSTRAINT documents_owner_fkey
+    FOREIGN KEY(owner)
+    REFERENCES auth.users (id);
+
+GRANT SELECT, INSERT ON app.documents TO authenticated;
+
+ALTER TABLE app.documents 
+  ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY documents_owner
+  ON app.documents
+  AS PERMISSIVE
+  FOR ALL
+  TO PUBLIC
+  USING (
+    owner = auth.uid()
+  );
