@@ -1,0 +1,19 @@
+%syntax-version=1.0.0
+%project=shop
+%uri=shop
+
+schemas/shop/schema 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/schema
+schemas/audit/schema 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/audit/schema
+schemas/shop/sequences/order_number_seq [schemas/shop/schema] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/sequences/order_number_seq
+schemas/shop/tables/customers/table [schemas/shop/schema] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/customers/table
+schemas/shop/tables/products/table [schemas/shop/schema] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/products/table
+schemas/shop/tables/orders/table [schemas/shop/schema schemas/shop/sequences/order_number_seq schemas/shop/tables/customers/table] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/orders/table
+schemas/shop/tables/order_items/table [schemas/shop/schema schemas/shop/tables/products/table schemas/shop/tables/orders/table] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/order_items/table
+schemas/audit/tables/change_log/table [schemas/audit/schema] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/audit/tables/change_log/table
+schemas/shop/procedures/order_total/procedure [schemas/shop/schema] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/procedures/order_total/procedure
+schemas/audit/procedures/log_order_change/procedure [schemas/audit/schema] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/audit/procedures/log_order_change/procedure
+schemas/shop/tables/orders/indexes/idx_orders_customer_id [schemas/shop/schema schemas/shop/tables/orders/table] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/orders/indexes/idx_orders_customer_id
+schemas/shop/tables/orders/indexes/idx_orders_placed_at [schemas/shop/schema schemas/shop/tables/orders/table] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/orders/indexes/idx_orders_placed_at
+schemas/shop/tables/order_items/indexes/idx_order_items_order_id [schemas/shop/schema schemas/shop/tables/order_items/table] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/order_items/indexes/idx_order_items_order_id
+schemas/shop/tables/orders/triggers/orders_audit_trigger [schemas/shop/schema schemas/audit/schema schemas/shop/tables/orders/table schemas/audit/procedures/log_order_change/procedure] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/orders/triggers/orders_audit_trigger
+schemas/shop/tables/orders/policies/orders_select_own/policy [schemas/shop/schema schemas/shop/tables/orders/table] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/orders/policies/orders_select_own/policy
