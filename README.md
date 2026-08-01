@@ -49,6 +49,11 @@ produced it.
 | [emit-bundle](examples/emit-bundle) | [the module](examples/import-dump/output/shop) | [content-addressed bundle](examples/emit-bundle/output/shop.bundle.tar.gz) powering `pgpm deploy --fast` |
 | [append-migration](examples/append-migration) | v1→v2 delta + [shop.v3.sql](examples/append-migration/input/shop.v3.sql) | [one living migration module](examples/append-migration/output/shop-migrations) (`diff --append-module`) covering v1→v3 |
 | [diff-live-db](examples/diff-live-db) | two **live databases** (`db:a` vs `db:b`) | migration module generated on demand at test time |
+| [compose-dials](examples/compose-dials) | [raw pg_dump](examples/import-dump/input/shop.v1.sql) | [all dials at once](examples/compose-dials/output/shop-composed) (atomic × per-alteration × flat) + [linear SQL](examples/compose-dials/output/shop-composed.sql), one command |
+| [diff-granularity](examples/diff-granularity) | the v1 module vs v2 | [per-alteration migration](examples/diff-granularity/output/shop-v1-to-v2-per-alteration) — same delta, 7 → 17 independently revertible changes |
+| [diff-bundle](examples/diff-bundle) | the v1 module vs v2 | [the delta as a content-addressed bundle](examples/diff-bundle/output/shop.v1-to-v2.bundle.tar.gz) |
+| [transform-check](examples/transform-check) | [the module](examples/import-dump/output/shop) | nothing — the CLI's built-in scratch-DB lossless-transform oracle |
+| [diff-module-vs-db](examples/diff-module-vs-db) | a module vs a **live database** | *blocked* — documents the mixed-side normalization asymmetry + workaround |
 
 See the full combination matrix in
 [constructive-planning#1344](https://github.com/constructive-io/constructive-planning/issues/1344);
