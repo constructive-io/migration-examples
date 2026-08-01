@@ -231,6 +231,42 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# 4b. shop@v1 + shop-migrations (v1->v2 appended with v2->v3) == v3 fresh
+# ---------------------------------------------------------------------------
+if [ -d examples/append-migration/output/shop-migrations ] && [ -d examples/import-dump/output/shop ]; then
+  deploy_module examples/import-dump/output/shop shop_v3_migrated
+  deploy_module examples/append-migration/output/shop-migrations shop_v3_migrated
+
+  note "load examples/append-migration/input/shop.v3.sql fresh -> shop_v3_fresh"
+  $PSQL -d postgres -c 'CREATE DATABASE shop_v3_fresh'
+  $PSQL -d shop_v3_fresh -v ON_ERROR_STOP=1 -f examples/append-migration/input/shop.v3.sql
+
+  assert_same_catalog shop_v3_migrated shop_v3_fresh "v1 + appended migrations vs v3 fresh"
+else
+  skip "appended migration check (examples/append-migration/output/shop-migrations)"
+fi
+
+# ---------------------------------------------------------------------------
+# 4c. live database sides: diff db:a db:b, deploy the delta, catalogs match
+# ---------------------------------------------------------------------------
+if [ -d examples/diff-live-db ]; then
+  note "load v1 -> live_a, v2 -> live_b"
+  $PSQL -d postgres -c 'CREATE DATABASE live_a'
+  $PSQL -d postgres -c 'CREATE DATABASE live_b'
+  $PSQL -d live_a -v ON_ERROR_STOP=1 -f examples/import-dump/input/shop.v1.sql
+  $PSQL -d live_b -v ON_ERROR_STOP=1 -f examples/diff-migration/input/shop.v2.sql
+
+  note "pgpm diff db:live_a db:live_b -> live delta module"
+  rm -rf examples/diff-live-db/output
+  pgpm diff db:live_a db:live_b --emit-migration examples/diff-live-db/output --pkg shop-live-delta --no-tty
+
+  deploy_module examples/diff-live-db/output/shop-live-delta live_a
+  assert_same_catalog live_a live_b "live_a + live delta vs live_b"
+else
+  skip "live-db diff check (examples/diff-live-db)"
+fi
+
+# ---------------------------------------------------------------------------
 # 5. full revert leaves each database clean
 # ---------------------------------------------------------------------------
 for pkg in "${DEPLOYED_VARIANTS[@]}"; do

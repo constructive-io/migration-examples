@@ -82,6 +82,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq postgresql-client-18
           echo "PG_DUMP=/usr/lib/postgresql/18/bin/pg_dump" >> "$GITHUB_ENV"
+          echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
 
       - name: Seed pg and app_user
         run: |
