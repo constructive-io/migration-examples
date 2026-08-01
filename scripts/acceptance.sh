@@ -322,7 +322,19 @@ if [ -d examples/port-supabase ]; then
   (cd examples/port-supabase \
     && pgpm materialize vendor-app-materialized --output output/vendor-app-materialized --no-tty \
     && pgpm materialize vendor-app-native-materialized --output output/vendor-app-native-materialized --no-tty)
-  if ! git diff --exit-code -- examples/port-supabase/output; then
+  note "re-pack port-supabase single-file SQL projections"
+  rm -rf /tmp/port-pack
+  (cd examples/port-supabase \
+    && pgpm transform --granularity object --out /tmp/port-pack \
+         --emit-sql "$ROOT/examples/port-supabase/input/vendor-app.sql" \
+         --cwd input/vendor-app --no-tty \
+    && pgpm transform --granularity object --out /tmp/port-pack \
+         --emit-sql "$ROOT/examples/port-supabase/output/vendor-app-materialized.sql" \
+         --cwd output/vendor-app-materialized --no-tty \
+    && pgpm transform --granularity object --out /tmp/port-pack \
+         --emit-sql "$ROOT/examples/port-supabase/output/vendor-app-native-materialized.sql" \
+         --cwd output/vendor-app-native-materialized --no-tty)
+  if ! git diff --exit-code -- examples/port-supabase/output examples/port-supabase/input/vendor-app.sql; then
     echo "FAIL: committed port-supabase outputs drifted from re-materialization"
     exit 1
   fi

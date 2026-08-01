@@ -16,7 +16,20 @@ in **both directions**.
 recipes ([`input/vendor-app-ported/pgpm.apply.json`](input/vendor-app-ported/pgpm.apply.json),
 [`input/vendor-app-native/pgpm.apply.json`](input/vendor-app-native/pgpm.apply.json)).
 
-**Output:**
+**Read it in three files** — each side also has a packed single-file SQL
+projection, the easiest way to see the transformation:
+
+| File | Shape |
+|---|---|
+| [`input/vendor-app.sql`](input/vendor-app.sql) | Supabase shape: `auth.users`, `owner = auth.uid()`, `extensions.uuid_generate_v4()` |
+| [`output/vendor-app-materialized.sql`](output/vendor-app-materialized.sql) | plain PostgreSQL: `app_auth.users`, `owner = app_auth.current_user_id()`, bare `uuid_generate_v4()` |
+| [`output/vendor-app-native-materialized.sql`](output/vendor-app-native-materialized.sql) | ported back: `auth.uid()` and `extensions.*` restored |
+
+```sh
+pgpm transform --granularity object --emit-sql <file>.sql --cwd <module>
+```
+
+**Output modules:**
 
 | Module | Direction | What changed |
 |---|---|---|
