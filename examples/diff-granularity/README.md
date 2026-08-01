@@ -1,4 +1,4 @@
-# diff-granularity — the dials applied to a migration
+# diff-granularity — projections applied to a migration
 
 **Input:** [`../import-dump/output/shop/`](../import-dump/output/shop) (v1) vs [`../diff-migration/input/shop.v2.sql`](../diff-migration/input/shop.v2.sql) (v2, imported first) — the same pair as [diff-migration](../diff-migration).
 

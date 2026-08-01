@@ -1,4 +1,4 @@
-# granularity-consolidated — the granularity dial, turned all the way up
+# granularity-consolidated — the granularity projection, maximally consolidated
 
 **Input:** [`../import-dump/output/shop/`](../import-dump/output/shop)
 

@@ -1,4 +1,4 @@
-# granularity-atomic — the granularity dial, turned all the way down
+# granularity-atomic — the granularity projection, fully atomic
 
 **Input:** [`../import-dump/output/shop/`](../import-dump/output/shop)
 

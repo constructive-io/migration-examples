@@ -1,4 +1,4 @@
-# partition-security — the partition dial
+# partition-security — the partition projection
 
 **Input:** [`../import-dump/output/shop/`](../import-dump/output/shop) + [`input/partition.json`](input/partition.json)
 

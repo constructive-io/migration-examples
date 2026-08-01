@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Acceptance test for the dials pipeline examples.
+# Acceptance test for the pgpm projections examples.
 #
 # For every committed module variant:
 #   1. deploy it into its own scratch database (pgpm deploy)
@@ -124,7 +124,7 @@ declare -A VARIANT_DB=(
   [examples/import-granularity/output/shop-atomic-direct]=shop_atomic_direct
   [examples/change-granularity-alteration/output/shop-per-alteration]=shop_per_alteration
   [examples/change-granularity-single/output/shop-single-change]=shop_single_change
-  [examples/compose-dials/output/shop-composed]=shop_composed
+  [examples/compose-projections/output/shop-composed]=shop_composed
 )
 
 DEPLOYED_VARIANTS=()
@@ -175,15 +175,15 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 3b1b. the composed (all-dials) single-file projection == the module
+# 3b1b. the composed (all-projections) single-file output == the module
 # ---------------------------------------------------------------------------
-if [ -f examples/compose-dials/output/shop-composed.sql ] && [ -d examples/import-dump/output/shop ]; then
-  note "load examples/compose-dials/output/shop-composed.sql fresh -> shop_composed_sql"
+if [ -f examples/compose-projections/output/shop-composed.sql ] && [ -d examples/import-dump/output/shop ]; then
+  note "load examples/compose-projections/output/shop-composed.sql fresh -> shop_composed_sql"
   $PSQL -d postgres -c 'CREATE DATABASE shop_composed_sql'
-  $PSQL -d shop_composed_sql -v ON_ERROR_STOP=1 -f examples/compose-dials/output/shop-composed.sql
+  $PSQL -d shop_composed_sql -v ON_ERROR_STOP=1 -f examples/compose-projections/output/shop-composed.sql
   assert_same_catalog shop_object shop_composed_sql "object vs composed single-file SQL"
 else
-  skip "composed single-file SQL check (examples/compose-dials/output/shop-composed.sql)"
+  skip "composed single-file SQL check (examples/compose-projections/output/shop-composed.sql)"
 fi
 
 # ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-# import-granularity — dial granularity at import time
+# import-granularity — choose granularity at import time
 
 **Input:** [`../import-dump/input/shop.v1.sql`](../import-dump/input/shop.v1.sql) — the same raw dump as [import-dump](../import-dump).
 
@@ -9,4 +9,4 @@ pgpm import examples/import-dump/input/shop.v1.sql --pkg shop-atomic-direct \
   --granularity atomic --out examples/import-granularity/output
 ```
 
-Demonstrates that the dials compose with any entry point: `import --granularity atomic` ≡ `import` then `transform --granularity atomic`. CI proves the catalog is identical to every other variant.
+Demonstrates that the projections compose with any entry point: `import --granularity atomic` ≡ `import` then `transform --granularity atomic`. CI proves the catalog is identical to every other variant.

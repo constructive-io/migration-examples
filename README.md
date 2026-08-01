@@ -10,21 +10,52 @@
   </a>
 </p>
 
-End-to-end demonstration of the **pgpm "dials" pipeline**: take an arbitrary
-`pg_dump --schema-only` SQL dump, turn it into a deployable pgpm module
-(`pgpm import`), re-project that module at different granularities and
-partitionings (`pgpm transform`), and generate a semantic migration between
-two schema versions (`pgpm diff`). The CI suite is the acceptance test: every
-variant deploys, all variants produce an **identical catalog**, and
-v1 + generated migration equals v2 deployed fresh.
+End-to-end demonstration of **pgpm schema projections**. Every PostgreSQL
+schema source — a raw `pg_dump`, a migration log, a pgpm module, a live
+database — is parsed into ASTs and normalized to one canonical semantic
+model; every output shape is a projection of that model. This repo is both
+the worked examples and the acceptance test: CI deploys every projection and
+proves they all produce the identical catalog.
 
-See the planning issues:
+- 🌳 **AST in, AST out** — every statement is parsed with the real PostgreSQL
+  parser and deparsed back to SQL; no regex or string rewriting anywhere.
+- 🔑 **Identity-keyed semantic model** — objects are keyed by
+  kind/schema/name; whitespace, statement order, constraint placement, and
+  authoring granularity all normalize away.
+- 🧩 **Statement folding** — `CREATE TABLE ()` + n×`ALTER TABLE ADD COLUMN` +
+  late constraints fold into one canonical `CREATE TABLE`; the inverse
+  projection explodes it back to one statement per alteration.
+- 🎚️ **Orthogonal projections** — statement shape (`--granularity`), change
+  distribution (`--change-granularity`), path naming (`--naming`), and package
+  partitioning (`--partition`) compose freely; every combination is
+  semantically invariant.
+- 🔍 **Semantic diff** — two sources (module, SQL file, or live database)
+  diff as identity-keyed object sets: tables compare column-by-column and
+  constraint-by-constraint, so changes emit `ALTER TABLE`, not a rebuild.
+- 📦 **Uniform output projections** — the same model emits a pgpm module, a
+  single linear SQL script, or a content-addressed bundle
+  (`--emit-migration` / `--emit-sql` / `--emit-bundle`), from any command.
+- ⚖️ **Catalog-equivalence proofs** — CI deploys every projection into its own
+  scratch database and asserts byte-identical normalized catalogs, plus clean
+  `pgpm verify` / `pgpm revert` cycles for every generated change.
+
+Built on [pgpm](https://github.com/constructive-io/constructive/tree/main/pgpm):
+[`@pgpmjs/transform`](https://github.com/constructive-io/constructive/tree/main/pgpm/transform)
+(the projection engine),
+[`@pgpmjs/import`](https://github.com/constructive-io/constructive/tree/main/pgpm/import) /
+[`@pgpmjs/diff`](https://github.com/constructive-io/constructive/tree/main/pgpm/diff)
+(source loading and semantic diff),
+[`@pgpmjs/naming-spec`](https://github.com/constructive-io/constructive/tree/main/pgpm/naming-spec)
+(identity → path projection), and the
+[pgpm CLI](https://github.com/constructive-io/constructive/tree/main/pgpm/cli).
+
+Planning issues:
 [constructive-planning#1340](https://github.com/constructive-io/constructive-planning/issues/1340)
 (import / transform / diff + this example repo),
 [constructive-planning#1344](https://github.com/constructive-io/constructive-planning/issues/1344)
 (the example matrix and this layout), and
 [constructive-planning#1329](https://github.com/constructive-io/constructive-planning/issues/1329)
-(three-dial roadmap).
+(the projections roadmap).
 
 ## The examples
 
@@ -49,7 +80,7 @@ produced it.
 | [emit-bundle](examples/emit-bundle) | [the module](examples/import-dump/output/shop) | [content-addressed bundle](examples/emit-bundle/output/shop.bundle.tar.gz) powering `pgpm deploy --fast` |
 | [append-migration](examples/append-migration) | v1→v2 delta + [shop.v3.sql](examples/append-migration/input/shop.v3.sql) | [one living migration module](examples/append-migration/output/shop-migrations) (`diff --append-module`) covering v1→v3 |
 | [diff-live-db](examples/diff-live-db) | two **live databases** (`db:a` vs `db:b`) | migration module generated on demand at test time |
-| [compose-dials](examples/compose-dials) | [raw pg_dump](examples/import-dump/input/shop.v1.sql) | [all dials at once](examples/compose-dials/output/shop-composed) (atomic × per-alteration × flat) + [linear SQL](examples/compose-dials/output/shop-composed.sql), one command |
+| [compose-projections](examples/compose-projections) | [raw pg_dump](examples/import-dump/input/shop.v1.sql) | [all projections at once](examples/compose-projections/output/shop-composed) (atomic × per-alteration × flat) + [linear SQL](examples/compose-projections/output/shop-composed.sql), one command |
 | [diff-granularity](examples/diff-granularity) | the v1 module vs v2 | [per-alteration migration](examples/diff-granularity/output/shop-v1-to-v2-per-alteration) — same delta, 7 → 17 independently revertible changes |
 | [diff-bundle](examples/diff-bundle) | the v1 module vs v2 | [the delta as a content-addressed bundle](examples/diff-bundle/output/shop.v1-to-v2.bundle.tar.gz) |
 | [transform-check](examples/transform-check) | [the module](examples/import-dump/output/shop) | nothing — the CLI's built-in scratch-DB lossless-transform oracle |
@@ -66,7 +97,7 @@ normalization bugs or on CLI features that haven't landed yet.
 migration-examples/               # pgpm init workspace
 ├── examples/
 │   └── <name>/
-│       ├── README.md             # the one command + what dial it demonstrates
+│       ├── README.md             # the one command + what projection it demonstrates
 │       ├── input/                # source artifacts (hand-written)
 │       └── output/               # generated artifacts (committed)
 ├── scripts/acceptance.sh         # the CI acceptance suite
