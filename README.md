@@ -35,6 +35,10 @@ proves they all produce the identical catalog.
 - 📦 **Uniform output projections** — the same model emits a pgpm module, a
   single linear SQL script, or a content-addressed bundle
   (`--emit-migration` / `--emit-sql` / `--emit-bundle`), from any command.
+- 🔌 **Cross-shape portability** — cascade-safe subsystem exclusion with
+  reference rebinding: a Supabase-shaped package re-targets plain PostgreSQL
+  (and back) by routing `auth.users` FKs and `auth.uid()` call sites onto a
+  substitute provider (`pgpm materialize`).
 - ⚖️ **Catalog-equivalence proofs** — CI deploys every projection into its own
   scratch database and asserts byte-identical normalized catalogs, plus clean
   `pgpm verify` / `pgpm revert` cycles for every generated change.
@@ -85,6 +89,7 @@ produced it.
 | [diff-bundle](examples/diff-bundle) | the v1 module vs v2 | [the delta as a content-addressed bundle](examples/diff-bundle/output/shop.v1-to-v2.bundle.tar.gz) |
 | [transform-check](examples/transform-check) | [the module](examples/import-dump/output/shop) | nothing — the CLI's built-in scratch-DB lossless-transform oracle |
 | [diff-module-vs-db](examples/diff-module-vs-db) | a module vs a **live database** | *blocked* — documents the mixed-side normalization asymmetry + workaround |
+| [port-supabase](examples/port-supabase) | [Supabase-shaped app](examples/port-supabase/input/vendor-app) (`auth.uid()` RLS, `extensions.*`) + [apply recipes](examples/port-supabase/input/vendor-app-ported/pgpm.apply.json) | [ported to plain PostgreSQL](examples/port-supabase/output/vendor-app-materialized) and [ported back to Supabase shape](examples/port-supabase/output/vendor-app-native-materialized) (`pgpm materialize`, both directions) |
 
 See the full combination matrix in
 [constructive-planning#1344](https://github.com/constructive-io/constructive-planning/issues/1344);

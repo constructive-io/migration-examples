@@ -314,6 +314,46 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# 4d. port-supabase: cross-shape transpilation, both directions
+# ---------------------------------------------------------------------------
+if [ -d examples/port-supabase ]; then
+  note "re-materialize port-supabase outputs (drift gate)"
+  rm -rf examples/port-supabase/output
+  (cd examples/port-supabase \
+    && pgpm materialize vendor-app-materialized --output output/vendor-app-materialized --no-tty \
+    && pgpm materialize vendor-app-native-materialized --output output/vendor-app-native-materialized --no-tty)
+  if ! git diff --exit-code -- examples/port-supabase/output; then
+    echo "FAIL: committed port-supabase outputs drifted from re-materialization"
+    exit 1
+  fi
+  note "port-supabase outputs are drift-free"
+
+  # forward: Supabase shape -> plain PostgreSQL (generic provider substitutes auth)
+  deploy_module examples/port-supabase/input/auth-provider port_pgpm
+  deploy_module examples/port-supabase/output/vendor-app-materialized port_pgpm
+
+  # reverse: ported shape -> back onto the vendor's native subsystem
+  note "seed port_vendor with the native auth/extensions environment"
+  $PSQL -d postgres -c 'CREATE DATABASE port_vendor'
+  $PSQL -d port_vendor -v ON_ERROR_STOP=1 -f examples/port-supabase/input/native-env.sql
+  deploy_module examples/port-supabase/output/vendor-app-native-materialized port_vendor
+
+  revert_module examples/port-supabase/output/vendor-app-materialized port_pgpm
+  revert_module examples/port-supabase/input/auth-provider port_pgpm
+  assert_db_clean port_pgpm
+  revert_module examples/port-supabase/output/vendor-app-native-materialized port_vendor
+  leftovers=$($PSQL -d port_vendor -tAc \
+    "SELECT string_agg(nspname, ',') FROM pg_namespace WHERE nspname = 'app'")
+  if [ -n "$leftovers" ]; then
+    echo "FAIL: revert left the app schema behind in port_vendor"
+    exit 1
+  fi
+  note "port_vendor left clean after revert (native env retained)"
+else
+  skip "port-supabase (examples/port-supabase)"
+fi
+
+# ---------------------------------------------------------------------------
 # 5. full revert leaves each database clean
 # ---------------------------------------------------------------------------
 for pkg in "${DEPLOYED_VARIANTS[@]}"; do

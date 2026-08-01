@@ -1,0 +1,26 @@
+{
+  "source": "vendor-app-materialized",
+  "route": [
+    {
+      "fromSchema": "app_auth",
+      "kind": "table",
+      "name": "users",
+      "toSchema": "auth"
+    },
+    {
+      "fromSchema": "app_auth",
+      "kind": "function",
+      "name": "current_user_id",
+      "toSchema": "auth",
+      "toName": "uid"
+    }
+  ],
+  "extensions": {
+    "toSchema": "extensions",
+    "from": [
+      null
+    ]
+  },
+  "requires": [],
+  "name": "vendor-app-native-materialized"
+}

@@ -1,0 +1,34 @@
+{
+  "source": "vendor-app",
+  "exclude": {
+    "schemas": [
+      "auth"
+    ]
+  },
+  "route": [
+    {
+      "fromSchema": "auth",
+      "kind": "table",
+      "name": "users",
+      "toSchema": "app_auth"
+    },
+    {
+      "fromSchema": "auth",
+      "kind": "function",
+      "name": "uid",
+      "toSchema": "app_auth",
+      "toName": "current_user_id"
+    }
+  ],
+  "extensions": {
+    "toSchema": null,
+    "from": [
+      "extensions"
+    ]
+  },
+  "requires": [
+    "auth-provider",
+    "uuid-ossp"
+  ],
+  "name": "vendor-app-materialized"
+}
