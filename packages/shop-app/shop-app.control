@@ -1,0 +1,5 @@
+# shop-app extension
+comment = 'shop-app extension'
+default_version = '0.0.1'
+relocatable = false
+superuser = false

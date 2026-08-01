@@ -1,0 +1,5 @@
+# shop-atomic extension
+comment = 'shop-atomic extension'
+default_version = '0.0.1'
+relocatable = false
+superuser = false

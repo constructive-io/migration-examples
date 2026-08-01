@@ -1,0 +1,6 @@
+# shop-security extension
+comment = 'shop-security extension'
+default_version = '0.0.1'
+relocatable = false
+superuser = false
+requires = 'shop-app'
