@@ -1,0 +1,10 @@
+%syntax-version=1.0.0
+%project=shop-security
+%uri=shop-security
+
+schemas/shop/schema/grants/app_user [shop-app:schemas/shop/schema] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/schema/grants/app_user
+schemas/shop/tables/customers/table/grants/app_user [shop-app:schemas/shop/schema shop-app:schemas/shop/tables/customers/table] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/customers/table/grants/app_user
+schemas/shop/tables/products/table/grants/app_user [shop-app:schemas/shop/schema shop-app:schemas/shop/tables/products/table] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/products/table/grants/app_user
+schemas/shop/tables/orders/table/grants/app_user [shop-app:schemas/shop/schema shop-app:schemas/shop/tables/orders/constraints/orders/constraint shop-app:schemas/shop/tables/orders/table] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/orders/table/grants/app_user
+schemas/shop/tables/order_items/table/grants/app_user [shop-app:schemas/shop/schema shop-app:schemas/shop/tables/order_items/constraints/order_items/constraint shop-app:schemas/shop/tables/order_items/table] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/order_items/table/grants/app_user
+schemas/shop/tables/orders/policies/orders_select_own/policy [shop-app:schemas/shop/schema shop-app:schemas/shop/tables/orders/constraints/orders/constraint shop-app:schemas/shop/tables/orders/table] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/orders/policies/orders_select_own/policy

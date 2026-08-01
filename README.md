@@ -65,37 +65,39 @@ comments ride with their host object.
 ### 2. `packages/shop-atomic` — the granularity dial, turned all the way down
 
 ```sh
-pgpm transform --granularity atomic --cwd packages/shop --out packages/shop-atomic
+pgpm transform --granularity atomic --cwd packages/shop --out "$PWD/packages"
 ```
 
-Re-dials the canonical module so every statement is its own change: maximal
-history granularity, same catalog.
+Re-dials the canonical module so every table is built atomically — an empty
+`CREATE TABLE` followed by one `ALTER TABLE` per column and constraint:
+maximal statement granularity, same catalog.
 
-> Status: pending.
+> Status: generated.
 
 ### 3. `packages/shop-consolidated` — the granularity dial, turned all the way up
 
 ```sh
-pgpm transform --granularity consolidated --cwd packages/shop --out packages/shop-consolidated
+pgpm transform --granularity consolidated --cwd packages/shop --out "$PWD/packages"
 ```
 
 Re-dials the module into a minimal number of consolidated changes: compact
 history, same catalog.
 
-> Status: pending.
+> Status: generated.
 
 ### 4. `packages/shop-app` + `packages/shop-security` — the partition dial
 
 ```sh
-pgpm transform --granularity object --partition partition.json --cwd packages/shop --out packages
+pgpm transform --granularity object --partition "$PWD/partition.json" --cwd packages/shop --out "$PWD/packages"
 ```
 
 Splits the module into two packages driven by [partition.json](partition.json):
 RLS policies and grants land in `shop-security`, everything else in
-`shop-app`, with derived cross-package `requires` so `shop-security` deploys
-on top of `shop-app`.
+`shop-app`, with derived cross-package `requires`
+(`shop-app:schemas/shop/tables/orders/table`-style) so `shop-security`
+deploys on top of `shop-app`.
 
-> Status: pending.
+> Status: generated — 16 changes in shop-app, 6 (grants + the RLS policy) in shop-security.
 
 ### 5. `packages/shop-v1-to-v2` — the diff
 
