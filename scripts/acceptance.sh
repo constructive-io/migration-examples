@@ -120,6 +120,8 @@ declare -A VARIANT_DB=(
   [examples/import-dump/output/shop]=shop_object
   [examples/granularity-atomic/output/shop-atomic]=shop_atomic
   [examples/granularity-consolidated/output/shop-consolidated]=shop_consolidated
+  [examples/naming-flat/output/shop-object]=shop_flat
+  [examples/import-granularity/output/shop-atomic-direct]=shop_atomic_direct
 )
 
 DEPLOYED_VARIANTS=()
@@ -167,6 +169,18 @@ if [ -f examples/pack-module/output/shop.module.sql ] && [ -d examples/import-du
   assert_same_catalog shop_object shop_packed "object vs packed single-file SQL"
 else
   skip "packed single-file SQL check (examples/pack-module/output/shop.module.sql)"
+fi
+
+# ---------------------------------------------------------------------------
+# 3b2. fast (bundle) deploy == normal change-by-change deploy
+# ---------------------------------------------------------------------------
+if [ -f examples/emit-bundle/output/shop.bundle.tar.gz ] && [ -d examples/import-dump/output/shop ]; then
+  note "fast deploy examples/import-dump/output/shop -> shop_fast"
+  $PSQL -d postgres -c 'CREATE DATABASE shop_fast'
+  (cd examples/import-dump/output/shop && pgpm deploy --database shop_fast --package shop --fast --yes --no-tty)
+  assert_same_catalog shop_object shop_fast "object vs fast (bundle) deploy"
+else
+  skip "fast (bundle) deploy check (examples/emit-bundle/output/shop.bundle.tar.gz)"
 fi
 
 # ---------------------------------------------------------------------------
