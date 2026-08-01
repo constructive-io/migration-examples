@@ -1,0 +1,13 @@
+{
+  "defaultPackage": "shop-app",
+  "splitRiders": ["grant"],
+  "rules": [
+    {
+      "package": "shop-security",
+      "select": [
+        { "kind": "policy" },
+        { "statementKind": "grant" }
+      ]
+    }
+  ]
+}
