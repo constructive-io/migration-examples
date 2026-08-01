@@ -34,7 +34,25 @@ catalog_dump() {
   raw="$(mktemp)"
   $PG_DUMP --schema-only --no-owner --exclude-schema 'pgpm*' "$db" > "$raw"
   grep -vE '^(--|SET |SELECT pg_catalog\.set_config|\\)' "$raw" \
-    | grep -v '^[[:space:]]*$' > "$out" || true
+    | grep -v '^[[:space:]]*$' \
+    | python3 -c '
+# Column order is a physical artifact (ALTER-based migrations always
+# append), so sort the body lines of each CREATE TABLE block.
+import sys
+body = None
+for line in sys.stdin:
+    line = line.rstrip("\n")
+    if line.startswith("CREATE TABLE"):
+        print(line); body = []
+    elif body is not None and line.startswith(");"):
+        for b in sorted(l.rstrip(",") for l in body):
+            print(b)
+        print(line); body = None
+    elif body is not None:
+        body.append(line)
+    else:
+        print(line)
+' > "$out" || true
   rm -f "$raw"
   if [ ! -s "$out" ]; then
     echo "FAIL: catalog dump of $db produced no output"

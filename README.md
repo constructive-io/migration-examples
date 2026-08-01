@@ -102,15 +102,25 @@ deploys on top of `shop-app`.
 ### 5. `packages/shop-v1-to-v2` — the diff
 
 ```sh
-pgpm diff packages/shop sources/shop.v2.sql --emit-migration packages --pkg shop-v1-to-v2
+pgpm import sources/shop.v2.sql --pkg shop-v2 --out /tmp/v2mod
+pgpm diff packages/shop /tmp/v2mod/shop-v2 --emit-migration packages --pkg shop-v1-to-v2 --verify
 ```
 
-Identity-keyed semantic diff between the v1 module and the v2 dump. Tables are
-compared column-by-column and constraint-by-constraint, so the delta is
+Identity-keyed semantic diff between the v1 module and the v2 schema. Tables
+are compared column-by-column and constraint-by-constraint, so the delta is
 `ALTER TABLE`, not a rebuild. The delta is emitted as a normal pgpm module you
-can deploy on top of v1.
+can deploy on top of v1 (`--verify` additionally proves it against a live
+scratch database).
 
-> Status: pending.
+The v2 dump is first imported into a throwaway module so both sides of the
+diff go through the same (import) normalization. Diffing a module directly
+against a raw `.sql` file currently produces spurious deltas — see the
+module-vs-raw normalization notes in
+[constructive-planning#1340](https://github.com/constructive-io/constructive-planning/issues/1340).
+
+> Status: generated — 4 added (product_reviews table/constraints/index +
+> `orders_insert_own` policy), 1 removed (`idx_orders_placed_at`), 3 changed
+> (customers ± columns, orders status check, `order_total` body).
 
 ## What CI proves
 
@@ -120,8 +130,8 @@ service container:
 1. every committed variant deploys into its own scratch database and passes
    `pgpm verify`;
 2. all granularity/partition variants produce **byte-identical normalized
-   catalogs** (`pg_dump --schema-only`, noise-stripped) — different shapes,
-   same schema;
+   catalogs** (`pg_dump --schema-only`, noise-stripped, table columns
+   order-normalized) — different shapes, same schema;
 3. deploying shop@v1 then `shop-v1-to-v2` yields the same catalog as loading
    `sources/shop.v2.sql` fresh;
 4. `pgpm revert` unwinds every module and leaves the database clean.
