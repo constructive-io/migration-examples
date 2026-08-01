@@ -3,3 +3,5 @@
 **/dist
 **/pnpm-debug.log
 lerna-debug.log
+# generated at test time by scripts/acceptance.sh (diff-live-db example)
+examples/diff-live-db/output/

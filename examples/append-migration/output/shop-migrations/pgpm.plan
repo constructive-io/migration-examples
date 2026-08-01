@@ -1,0 +1,12 @@
+%syntax-version=1.0.0
+%project=shop-migrations
+%uri=shop-migrations
+
+schemas/shop/tables/orders/indexes/idx_orders_placed_at/drop 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/orders/indexes/idx_orders_placed_at/drop
+schemas/shop/tables/product_reviews/table 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/product_reviews/table
+schemas/shop/tables/product_reviews/indexes/idx_product_reviews_product_id [schemas/shop/tables/product_reviews/table] 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/product_reviews/indexes/idx_product_reviews_product_id
+schemas/shop/tables/orders/policies/orders_insert_own/policy 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/orders/policies/orders_insert_own/policy
+schemas/shop/tables/customers/table/alter 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/customers/table/alter
+schemas/shop/tables/orders/table/alter 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/tables/orders/table/alter
+schemas/shop/procedures/order_total/procedure 2017-08-11T08:11:51Z constructive <constructive@5b0c196eeb62> # add schemas/shop/procedures/order_total/procedure
+schemas/shop/tables/coupons/table 2026-08-01T05:31:07Z constructive <constructive@constructive.io> # add schemas/shop/tables/coupons/table
