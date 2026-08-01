@@ -1,0 +1,6 @@
+-- Verify: schemas/shop/tables/customers/constraints/customers_pkey/constraint
+
+
+SELECT 1/(CASE WHEN EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE table_name = 'customers' AND constraint_name = 'customers_pkey' AND table_schema = 'shop') THEN 1 ELSE 0 END);
+
+

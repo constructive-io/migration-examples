@@ -122,6 +122,8 @@ declare -A VARIANT_DB=(
   [examples/granularity-consolidated/output/shop-consolidated]=shop_consolidated
   [examples/naming-flat/output/shop-object]=shop_flat
   [examples/import-granularity/output/shop-atomic-direct]=shop_atomic_direct
+  [examples/change-granularity-alteration/output/shop-per-alteration]=shop_per_alteration
+  [examples/change-granularity-single/output/shop-single-change]=shop_single_change
 )
 
 DEPLOYED_VARIANTS=()

@@ -1,0 +1,12 @@
+-- Deploy: schemas/shop/tables/products/columns/created_at/column
+-- made with <3 @ constructive.io
+
+-- requires: schemas/shop/schema
+-- requires: schemas/shop/tables/products/table
+
+
+ALTER TABLE shop.products 
+  ADD COLUMN created_at timestamptz
+    DEFAULT now()
+    NOT NULL;
+
