@@ -42,9 +42,11 @@ produced it.
 | [diff-migration](examples/diff-migration) | [the module (v1)](examples/import-dump/output/shop) vs [shop.v2.sql](examples/diff-migration/input/shop.v2.sql) | [migration module](examples/diff-migration/output/shop-v1-to-v2) + [delta as one SQL file](examples/diff-migration/output/shop.v1-to-v2.sql) |
 | [fold-atomic-statements](examples/fold-atomic-statements) | [atomic statement soup](examples/fold-atomic-statements/input/blog.atomic.sql) (empty `CREATE TABLE ()` + one `ADD COLUMN` per statement) | [grouped module](examples/fold-atomic-statements/output/blog) with fully folded CREATE TABLEs |
 | [flatten-history](examples/flatten-history) | [evolution log with churn](examples/flatten-history/input/inventory.churn.sql) (ADD then DROP column, late NOT NULL) | [flattened module](examples/flatten-history/output/inventory) |
+| [import-granularity](examples/import-granularity) | [raw pg_dump](examples/import-dump/input/shop.v1.sql) | [atomic module in one step](examples/import-granularity/output/shop-atomic-direct) (`import --granularity atomic`) |
+| [naming-flat](examples/naming-flat) | [the module](examples/import-dump/output/shop) | [flat change-path layout](examples/naming-flat/output/shop-object) (`--naming flat`) |
+| [emit-bundle](examples/emit-bundle) | [the module](examples/import-dump/output/shop) | [content-addressed bundle](examples/emit-bundle/output/shop.bundle.tar.gz) powering `pgpm deploy --fast` |
 
-More examples are planned (`--naming flat`, bundles + `deploy --fast`,
-`--append-module`, live-db diff sides) — see the full combination matrix in
+More examples are planned (`--append-module`, live-db diff sides) — see the full combination matrix in
 [constructive-planning#1344](https://github.com/constructive-io/constructive-planning/issues/1344).
 
 ## Layout
