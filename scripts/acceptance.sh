@@ -124,6 +124,7 @@ declare -A VARIANT_DB=(
   [examples/import-granularity/output/shop-atomic-direct]=shop_atomic_direct
   [examples/change-granularity-alteration/output/shop-per-alteration]=shop_per_alteration
   [examples/change-granularity-single/output/shop-single-change]=shop_single_change
+  [examples/compose-dials/output/shop-composed]=shop_composed
 )
 
 DEPLOYED_VARIANTS=()
@@ -174,6 +175,18 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# 3b1b. the composed (all-dials) single-file projection == the module
+# ---------------------------------------------------------------------------
+if [ -f examples/compose-dials/output/shop-composed.sql ] && [ -d examples/import-dump/output/shop ]; then
+  note "load examples/compose-dials/output/shop-composed.sql fresh -> shop_composed_sql"
+  $PSQL -d postgres -c 'CREATE DATABASE shop_composed_sql'
+  $PSQL -d shop_composed_sql -v ON_ERROR_STOP=1 -f examples/compose-dials/output/shop-composed.sql
+  assert_same_catalog shop_object shop_composed_sql "object vs composed single-file SQL"
+else
+  skip "composed single-file SQL check (examples/compose-dials/output/shop-composed.sql)"
+fi
+
+# ---------------------------------------------------------------------------
 # 3b2. fast (bundle) deploy == normal change-by-change deploy
 # ---------------------------------------------------------------------------
 if [ -f examples/emit-bundle/output/shop.bundle.tar.gz ] && [ -d examples/import-dump/output/shop ]; then
@@ -218,6 +231,26 @@ if [ -d examples/diff-migration/output/shop-v1-to-v2 ] && [ -d examples/import-d
 
   assert_same_catalog shop_migrated shop_v2_fresh "v1 + migration vs v2 fresh"
 
+  # the same delta emitted per-alteration (diff --granularity/--change-granularity)
+  if [ -d examples/diff-granularity/output/shop-v1-to-v2-per-alteration ]; then
+    deploy_module examples/import-dump/output/shop shop_migrated_alt
+    deploy_module examples/diff-granularity/output/shop-v1-to-v2-per-alteration shop_migrated_alt
+    assert_same_catalog shop_migrated_alt shop_v2_fresh "v1 + per-alteration migration vs v2 fresh"
+  else
+    skip "per-alteration migration check (examples/diff-granularity/output/shop-v1-to-v2-per-alteration)"
+  fi
+
+  # the same delta as a content-addressed bundle artifact
+  if [ -f examples/diff-bundle/output/shop.v1-to-v2.bundle.tar.gz ]; then
+    note "inspect examples/diff-bundle/output/shop.v1-to-v2.bundle.tar.gz manifest"
+    manifest=$(tar -xzOf examples/diff-bundle/output/shop.v1-to-v2.bundle.tar.gz pgpm-bundle.json)
+    echo "$manifest" | grep -q '"name": "shop-v1-to-v2"'
+    echo "$manifest" | grep -q '"changeCount": 7'
+    note "diff bundle manifest OK (shop-v1-to-v2, 7 changes)"
+  else
+    skip "diff bundle check (examples/diff-bundle/output/shop.v1-to-v2.bundle.tar.gz)"
+  fi
+
   # the --emit-sql projection of the same delta, applied as plain SQL
   if [ -f examples/diff-migration/output/shop.v1-to-v2.sql ]; then
     note "load v1 dump + linear delta SQL -> shop_sql_migrated"
@@ -246,6 +279,18 @@ if [ -d examples/append-migration/output/shop-migrations ] && [ -d examples/impo
   assert_same_catalog shop_v3_migrated shop_v3_fresh "v1 + appended migrations vs v3 fresh"
 else
   skip "appended migration check (examples/append-migration/output/shop-migrations)"
+fi
+
+# ---------------------------------------------------------------------------
+# 4b2. transform --check: the CLI's own lossless-transform oracle
+# ---------------------------------------------------------------------------
+if [ -d examples/import-dump/output/shop ]; then
+  note "pgpm transform --check (consolidated) on examples/import-dump/output/shop"
+  rm -rf /tmp/transform-check
+  pgpm transform --granularity consolidated --check \
+    --cwd examples/import-dump/output/shop --out /tmp/transform-check --no-tty
+else
+  skip "transform --check (examples/import-dump/output/shop)"
 fi
 
 # ---------------------------------------------------------------------------
