@@ -1,2 +1,46 @@
 packages:
   - 'examples/*/output/*'
+
+# The only dependencies permitted to run install scripts.
+allowBuilds:
+  nx: true # transitive dep of lerna (via @nx/devkit), needed for our monorepo build/versioning tooling
+  unrs-resolver: true # native resolver transitively required by jest-resolve for our test suite
+
+# Exempt from the wait: 6 scope glob(s), 20 first-party package(s).
+# First-party membership comes from what pyramation publishes on npm — waiting on your own release protects nothing.
+minimumReleaseAgeExclude:
+  - "@constructive-db/*"
+  - "@constructive-io/*"
+  - "@launchql/*"
+  - "@pgpm/*"
+  - "@pgpmjs/*"
+  - "@pgsql/*"
+  - 12factor-env
+  - appstash
+  - csv-to-pg
+  - find-and-require-package-json
+  - genomic
+  - inquirerer
+  - libpg-query
+  - makage
+  - nested-obj
+  - pg-cache
+  - pg-env
+  - pg-seed
+  - pgsql-client
+  - pgsql-deparser
+  - pgsql-parser
+  - pgsql-seed
+  - pgsql-test
+  - pnpm-policy
+  - yamlize
+  - yanse
+
+# Managed by pnpm-policy — run `pnpm-policy generate` after editing pnpm-policy.yaml.
+
+# A third-party release must be 2d old before it can be installed.
+# Most malicious releases are found and yanked well inside that window.
+minimumReleaseAge: 2880
+
+# Transitive dependencies must come from the registry, not from git or a URL.
+blockExoticSubdeps: true
