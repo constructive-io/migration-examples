@@ -60,6 +60,9 @@ jobs:
       - name: Install
         run: pnpm install
 
+      - name: Check supply-chain policy
+        run: pnpm run policy:check
+
       - name: Cache pgpm CLI
         uses: actions/cache@v4
         with:
